@@ -1,0 +1,14 @@
+```json
+{
+  "name": "gameos-server",
+  "version": "1.0.0",
+  "description": "GameOS x86 server",
+  "main": "server.js",
+  "scripts": {
+    "start": "node server.js"
+  },
+  "engines": {
+    "node": "22.x"
+  }
+}
+```
