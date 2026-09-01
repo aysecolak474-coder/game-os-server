@@ -1,0 +1,1308 @@
+<!DOCTYPE html>
+<html lang="tr">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width,initial-scale=1.0">
+<title>GameOS x86</title>
+
+<style>
+*{
+    box-sizing:border-box;
+    user-select:none;
+}
+
+html,body{
+    margin:0;
+    width:100%;
+    height:100%;
+    overflow:hidden;
+    font-family:"Segoe UI",Arial,sans-serif;
+    background:#111;
+}
+
+/* BOOT */
+
+#boot{
+    position:fixed;
+    inset:0;
+    background:#050505;
+    color:white;
+    display:flex;
+    align-items:center;
+    justify-content:center;
+    flex-direction:column;
+    z-index:9999;
+}
+
+.bootLogo{
+    width:90px;
+    height:90px;
+    display:grid;
+    grid-template-columns:1fr 1fr;
+    grid-template-rows:1fr 1fr;
+    gap:5px;
+    margin-bottom:25px;
+}
+
+.bootLogo div{
+    background:#08a4ff;
+}
+
+.bootTitle{
+    font-size:27px;
+    font-weight:600;
+}
+
+.bootSub{
+    color:#aaa;
+    margin-top:5px;
+}
+
+.bootBar{
+    width:320px;
+    height:5px;
+    background:#333;
+    margin-top:30px;
+    overflow:hidden;
+}
+
+.bootProgress{
+    width:0%;
+    height:100%;
+    background:#08a4ff;
+    transition:width .15s;
+}
+
+/* DESKTOP */
+
+#desktop{
+    position:fixed;
+    inset:0;
+    background:
+        radial-gradient(circle at 70% 20%,#16466b 0,#0d263c 35%,#07131f 75%);
+    color:white;
+}
+
+/* fake windows wallpaper */
+
+.wallGlow{
+    position:absolute;
+    width:500px;
+    height:500px;
+    border-radius:50%;
+    background:rgba(0,150,255,.08);
+    filter:blur(70px);
+    right:10%;
+    top:5%;
+}
+
+/* DESKTOP ICONS */
+
+.icons{
+    position:absolute;
+    top:25px;
+    left:20px;
+    display:flex;
+    flex-direction:column;
+    gap:18px;
+}
+
+.icon{
+    width:80px;
+    text-align:center;
+    padding:8px 4px;
+    border-radius:6px;
+    cursor:pointer;
+}
+
+.icon:hover{
+    background:rgba(255,255,255,.12);
+}
+
+.iconSymbol{
+    font-size:34px;
+    margin-bottom:5px;
+}
+
+.iconName{
+    font-size:12px;
+}
+
+/* TASKBAR */
+
+.taskbar{
+    position:absolute;
+    bottom:0;
+    left:0;
+    right:0;
+    height:58px;
+    background:rgba(20,25,32,.94);
+    border-top:1px solid rgba(255,255,255,.12);
+    display:flex;
+    align-items:center;
+    justify-content:center;
+    z-index:500;
+}
+
+.taskCenter{
+    display:flex;
+    align-items:center;
+    gap:5px;
+}
+
+.taskButton{
+    width:46px;
+    height:44px;
+    border:0;
+    background:transparent;
+    color:white;
+    font-size:21px;
+    border-radius:5px;
+    cursor:pointer;
+}
+
+.taskButton:hover{
+    background:rgba(255,255,255,.12);
+}
+
+.startButton{
+    color:#20aaff;
+    font-size:24px;
+}
+
+.clock{
+    position:absolute;
+    right:15px;
+    top:9px;
+    text-align:right;
+    font-size:12px;
+    line-height:18px;
+}
+
+/* START MENU */
+
+#startMenu{
+    position:absolute;
+    width:600px;
+    height:650px;
+    left:50%;
+    transform:translateX(-50%);
+    bottom:68px;
+    background:rgba(28,32,38,.97);
+    border:1px solid rgba(255,255,255,.12);
+    border-radius:8px;
+    box-shadow:0 20px 60px #0009;
+    display:none;
+    z-index:800;
+    padding:28px;
+}
+
+.startSearch{
+    width:100%;
+    height:42px;
+    border:0;
+    outline:0;
+    border-radius:5px;
+    padding:0 15px;
+    background:#3a3f45;
+    color:white;
+    font-size:14px;
+}
+
+.startTitle{
+    margin:25px 0 15px;
+    font-size:17px;
+}
+
+.startApps{
+    display:grid;
+    grid-template-columns:repeat(4,1fr);
+    gap:8px;
+}
+
+.startApp{
+    height:85px;
+    display:flex;
+    flex-direction:column;
+    justify-content:center;
+    align-items:center;
+    border-radius:6px;
+    cursor:pointer;
+}
+
+.startApp:hover{
+    background:#ffffff12;
+}
+
+.startApp span:first-child{
+    font-size:30px;
+    margin-bottom:7px;
+}
+
+.startApp span:last-child{
+    font-size:12px;
+}
+
+/* WINDOWS */
+
+.window{
+    position:absolute;
+    width:850px;
+    height:560px;
+    left:50%;
+    top:50%;
+    transform:translate(-50%,-53%);
+    background:#20252b;
+    border:1px solid #ffffff20;
+    border-radius:7px;
+    box-shadow:0 25px 70px #000b;
+    overflow:hidden;
+    display:none;
+    z-index:300;
+}
+
+.windowHeader{
+    height:43px;
+    background:#292e34;
+    display:flex;
+    align-items:center;
+    padding-left:15px;
+    font-size:13px;
+}
+
+.windowTitle{
+    flex:1;
+}
+
+.winBtn{
+    width:45px;
+    height:43px;
+    border:0;
+    background:transparent;
+    color:white;
+    cursor:pointer;
+}
+
+.winBtn:hover{
+    background:#ffffff14;
+}
+
+.close:hover{
+    background:#c42b2b;
+}
+
+/* GAME CENTER */
+
+.gameContent{
+    padding:25px;
+}
+
+.gameHero{
+    height:150px;
+    border-radius:8px;
+    background:linear-gradient(120deg,#075c9c,#101b2b);
+    display:flex;
+    align-items:center;
+    padding:30px;
+    margin-bottom:25px;
+}
+
+.gameHeroIcon{
+    font-size:70px;
+    margin-right:25px;
+}
+
+.gameHero h1{
+    margin:0 0 8px;
+}
+
+.gameHero p{
+    margin:0;
+    color:#b9c2cb;
+}
+
+.games{
+    display:grid;
+    grid-template-columns:repeat(3,1fr);
+    gap:18px;
+}
+
+.game{
+    background:#2b3036;
+    border:1px solid #ffffff0d;
+    border-radius:8px;
+    overflow:hidden;
+    transition:.15s;
+}
+
+.game:hover{
+    transform:translateY(-3px);
+    background:#32383f;
+}
+
+.gameArt{
+    height:145px;
+    display:flex;
+    align-items:center;
+    justify-content:center;
+    font-size:65px;
+    background:linear-gradient(135deg,#16283a,#263b4c);
+}
+
+.gameInfo{
+    padding:15px;
+}
+
+.gameInfo h3{
+    margin:0 0 5px;
+}
+
+.gameInfo p{
+    color:#9ea8b1;
+    font-size:12px;
+    height:30px;
+}
+
+.play{
+    width:100%;
+    height:35px;
+    border:0;
+    background:#078bea;
+    color:white;
+    border-radius:4px;
+    cursor:pointer;
+    font-weight:600;
+}
+
+.play:hover{
+    background:#159cf5;
+}
+
+/* CONNECT SCREEN */
+
+#connectScreen{
+    position:absolute;
+    inset:0;
+    background:#101419;
+    display:none;
+    align-items:center;
+    justify-content:center;
+    flex-direction:column;
+    z-index:20;
+}
+
+.connectIcon{
+    font-size:70px;
+    margin-bottom:15px;
+}
+
+.connectTitle{
+    font-size:25px;
+    font-weight:600;
+}
+
+.connectText{
+    color:#9fa8b1;
+    margin-top:8px;
+}
+
+.connectBar{
+    width:330px;
+    height:5px;
+    background:#30363d;
+    margin-top:25px;
+}
+
+.connectProgress{
+    height:100%;
+    width:0;
+    background:#08a4ff;
+    transition:width .25s;
+}
+
+/* TERMINAL */
+
+.terminal{
+    padding:15px;
+    height:calc(100% - 43px);
+    background:#080b0e;
+    color:#c9f7c9;
+    font-family:Consolas,monospace;
+    overflow:auto;
+}
+
+.terminalInput{
+    background:transparent;
+    border:0;
+    outline:0;
+    color:#c9f7c9;
+    font-family:inherit;
+    width:80%;
+}
+
+/* SETTINGS */
+
+.settings{
+    padding:30px;
+}
+
+.setting{
+    background:#2b3036;
+    padding:18px;
+    margin-bottom:10px;
+    border-radius:6px;
+}
+
+.setting button{
+    margin-top:10px;
+    padding:8px 15px;
+    background:#087fce;
+    color:white;
+    border:0;
+    border-radius:4px;
+}
+
+/* NOTIFICATION */
+
+#notification{
+    position:absolute;
+    right:20px;
+    bottom:75px;
+    background:#292e34;
+    border:1px solid #ffffff18;
+    border-radius:7px;
+    padding:15px 20px;
+    min-width:260px;
+    box-shadow:0 10px 30px #0008;
+    transform:translateX(350px);
+    transition:.3s;
+    z-index:1000;
+}
+
+#notification.show{
+    transform:translateX(0);
+}
+</style>
+</head>
+
+<body>
+
+<!-- BOOT -->
+
+<div id="boot">
+    <div class="bootLogo">
+        <div></div><div></div>
+        <div></div><div></div>
+    </div>
+
+    <div class="bootTitle">GAMEOS x86</div>
+    <div class="bootSub">Gaming Edition</div>
+
+    <div class="bootBar">
+        <div class="bootProgress" id="bootProgress"></div>
+    </div>
+</div>
+
+<!-- DESKTOP -->
+
+<div id="desktop">
+
+    <div class="wallGlow"></div>
+
+    <div class="icons">
+
+        <div class="icon" onclick="openWindow('games')">
+            <div class="iconSymbol">??</div>
+            <div class="iconName">Game Center</div>
+        </div>
+
+        <div class="icon" onclick="openWindow('files')">
+            <div class="iconSymbol">??</div>
+            <div class="iconName">Game Files</div>
+        </div>
+
+        <div class="icon" onclick="openWindow('terminal')">
+            <div class="iconSymbol">??</div>
+            <div class="iconName">Terminal</div>
+        </div>
+
+        <div class="icon" onclick="openWindow('settings')">
+            <div class="iconSymbol">??</div>
+            <div class="iconName">Settings</div>
+        </div>
+
+    </div>
+
+    <!-- GAME CENTER -->
+
+    <div class="window" id="games">
+
+        <div class="windowHeader">
+            <div class="windowTitle">?? Game Center</div>
+
+            <button class="winBtn" onclick="minimizeWindow('games')">—</button>
+            <button class="winBtn close" onclick="closeWindow('games')">×</button>
+        </div>
+
+        <div class="gameContent">
+
+            <div class="gameHero">
+                <div class="gameHeroIcon">??</div>
+
+                <div>
+                    <h1>Game Center</h1>
+                    <p>GameOS x86 oyun merkezi</p>
+                </div>
+            </div>
+
+            <div class="games">
+
+                <!-- ROBLOX -->
+
+                <div class="game">
+
+                    <div class="gameArt">??</div>
+
+                    <div class="gameInfo">
+
+                        <h3>Roblox</h3>
+
+                        <p>
+                            Uzak oyun bilgisayarýna baðlan.
+                        </p>
+
+                        <button class="play"
+                                onclick="launchGame('Roblox','??')">
+                            OYNA
+                        </button>
+
+                    </div>
+
+                </div>
+
+                <!-- MINECRAFT -->
+
+                <div class="game">
+
+                    <div class="gameArt">??</div>
+
+                    <div class="gameInfo">
+
+                        <h3>Minecraft</h3>
+
+                        <p>
+                            Uzak bilgisayardan Minecraft baþlat.
+                        </p>
+
+                        <button class="play"
+                                onclick="launchGame('Minecraft','??')">
+                            OYNA
+                        </button>
+
+                    </div>
+
+                </div>
+
+                <!-- CUPHEAD -->
+
+                <div class="game">
+
+                    <div class="gameArt">?</div>
+
+                    <div class="gameInfo">
+
+                        <h3>Cuphead</h3>
+
+                        <p>
+                            Uzak bilgisayardan oyuna baðlan.
+                        </p>
+
+                        <button class="play"
+                                onclick="launchGame('Cuphead','?')">
+                            OYNA
+                        </button>
+
+                    </div>
+
+                </div>
+
+            </div>
+
+        </div>
+
+    </div>
+
+    <!-- CONNECT / GAME WINDOW -->
+
+    <div class="window" id="gameWindow">
+
+        <div class="windowHeader">
+
+            <div class="windowTitle" id="gameWindowTitle">
+                GameOS Game
+            </div>
+
+            <button class="winBtn"
+                    onclick="minimizeWindow('gameWindow')">
+                —
+            </button>
+
+            <button class="winBtn close"
+                    onclick="closeGame()">
+                ×
+            </button>
+
+        </div>
+
+        <div id="connectScreen">
+
+            <div class="connectIcon" id="connectIcon">??</div>
+
+            <div class="connectTitle"
+                 id="connectTitle">
+                Connecting...
+            </div>
+
+            <div class="connectText"
+                 id="connectText">
+                Uzak oyun bilgisayarý aranýyor...
+            </div>
+
+            <div class="connectBar">
+
+                <div class="connectProgress"
+                     id="connectProgress">
+                </div>
+
+            </div>
+
+        </div>
+
+    </div>
+
+    <!-- FILES -->
+
+    <div class="window" id="files">
+
+        <div class="windowHeader">
+
+            <div class="windowTitle">
+                ?? Game Files
+            </div>
+
+            <button class="winBtn"
+                    onclick="minimizeWindow('files')">
+                —
+            </button>
+
+            <button class="winBtn close"
+                    onclick="closeWindow('files')">
+                ×
+            </button>
+
+        </div>
+
+        <div class="gameContent">
+
+            <h2>Game Files</h2>
+
+            <div class="setting">
+                ?? Roblox
+                <br>
+                <small>Remote Game</small>
+            </div>
+
+            <div class="setting">
+                ?? Minecraft
+                <br>
+                <small>Remote Game</small>
+            </div>
+
+            <div class="setting">
+                ? Cuphead
+                <br>
+                <small>Remote Game</small>
+            </div>
+
+        </div>
+
+    </div>
+
+    <!-- TERMINAL -->
+
+    <div class="window" id="terminal">
+
+        <div class="windowHeader">
+
+            <div class="windowTitle">
+                ?? GameOS Terminal
+            </div>
+
+            <button class="winBtn"
+                    onclick="minimizeWindow('terminal')">
+                —
+            </button>
+
+            <button class="winBtn close"
+                    onclick="closeWindow('terminal')">
+                ×
+            </button>
+
+        </div>
+
+        <div class="terminal" id="terminalOutput">
+
+            GameOS x86 Terminal v1.0<br>
+            Gaming Edition<br><br>
+
+            Type <b>help</b> for commands.<br><br>
+
+            <span>GameOS&gt; </span>
+
+            <input class="terminalInput"
+                   id="terminalInput"
+                   autocomplete="off"
+                   onkeydown="terminalCommand(event)">
+
+        </div>
+
+    </div>
+
+    <!-- SETTINGS -->
+
+    <div class="window" id="settings">
+
+        <div class="windowHeader">
+
+            <div class="windowTitle">
+                ?? Settings
+            </div>
+
+            <button class="winBtn"
+                    onclick="minimizeWindow('settings')">
+                —
+            </button>
+
+            <button class="winBtn close"
+                    onclick="closeWindow('settings')">
+                ×
+            </button>
+
+        </div>
+
+        <div class="settings">
+
+            <h2>GameOS Settings</h2>
+
+            <div class="setting">
+                ?? Performance Mode
+                <br>
+                <button onclick="notify('Performance Mode aktif!')">
+                    ENABLE
+                </button>
+            </div>
+
+            <div class="setting">
+                ??? Graphics
+                <br>
+                <button onclick="notify('Graphics: High')">
+                    HIGH
+                </button>
+            </div>
+
+            <div class="setting">
+                ?? Remote PC
+                <br>
+                <button onclick="notify('Remote PC ayarlarý daha sonra eklenecek.')">
+                    CONFIGURE
+                </button>
+            </div>
+
+        </div>
+
+    </div>
+
+    <!-- START -->
+
+    <div id="startMenu">
+
+        <input class="startSearch"
+               placeholder="Search games and apps...">
+
+        <div class="startTitle">
+            ?? Pinned
+        </div>
+
+        <div class="startApps">
+
+            <div class="startApp"
+                 onclick="openWindow('games')">
+                <span>??</span>
+                <span>Game Center</span>
+            </div>
+
+            <div class="startApp"
+                 onclick="openWindow('files')">
+                <span>??</span>
+                <span>Files</span>
+            </div>
+
+            <div class="startApp"
+                 onclick="openWindow('terminal')">
+                <span>??</span>
+                <span>Terminal</span>
+            </div>
+
+            <div class="startApp"
+                 onclick="openWindow('settings')">
+                <span>??</span>
+                <span>Settings</span>
+            </div>
+
+        </div>
+
+    </div>
+
+    <!-- TASKBAR -->
+
+    <div class="taskbar">
+
+        <div class="taskCenter">
+
+            <button class="taskButton startButton"
+                    onclick="toggleStart()">
+                ?
+            </button>
+
+            <button class="taskButton"
+                    onclick="openWindow('games')">
+                ??
+            </button>
+
+            <button class="taskButton"
+                    onclick="openWindow('files')">
+                ??
+            </button>
+
+            <button class="taskButton"
+                    onclick="openWindow('terminal')">
+                ??
+            </button>
+
+            <button class="taskButton"
+                    onclick="openWindow('settings')">
+                ??
+            </button>
+
+        </div>
+
+        <div class="clock"
+             id="clock">
+        </div>
+
+    </div>
+
+    <div id="notification"></div>
+
+</div>
+
+<script>
+
+/* =========================
+   BOOT
+========================= */
+
+let progress = 0;
+
+const bootTimer = setInterval(() => {
+
+    progress += Math.floor(Math.random()*12)+5;
+
+    if(progress >= 100){
+
+        progress = 100;
+
+        clearInterval(bootTimer);
+
+        setTimeout(() => {
+
+            document.getElementById("boot").style.display="none";
+
+            notify("GameOS x86 hazýr!");
+
+        },500);
+
+    }
+
+    document.getElementById("bootProgress").style.width =
+        progress+"%";
+
+},180);
+
+
+/* =========================
+   CLOCK
+========================= */
+
+function updateClock(){
+
+    const now = new Date();
+
+    const time =
+        now.toLocaleTimeString("tr-TR",{
+            hour:"2-digit",
+            minute:"2-digit"
+        });
+
+    const date =
+        now.toLocaleDateString("tr-TR");
+
+    document.getElementById("clock").innerHTML =
+        time+"<br>"+date;
+}
+
+setInterval(updateClock,1000);
+updateClock();
+
+
+/* =========================
+   WINDOWS
+========================= */
+
+let highestZ = 300;
+
+function openWindow(id){
+
+    const win = document.getElementById(id);
+
+    win.style.display="block";
+
+    highestZ++;
+
+    win.style.zIndex=highestZ;
+
+    document.getElementById("startMenu").style.display="none";
+}
+
+function closeWindow(id){
+
+    document.getElementById(id).style.display="none";
+}
+
+function minimizeWindow(id){
+
+    document.getElementById(id).style.display="none";
+}
+
+
+/* =========================
+   START
+========================= */
+
+function toggleStart(){
+
+    const menu =
+        document.getElementById("startMenu");
+
+    menu.style.display =
+        menu.style.display==="block"
+        ? "none"
+        : "block";
+}
+
+
+/* =========================
+   NOTIFICATIONS
+========================= */
+
+let notificationTimer;
+
+function notify(text){
+
+    const n =
+        document.getElementById("notification");
+
+    n.textContent=text;
+
+    n.classList.add("show");
+
+    clearTimeout(notificationTimer);
+
+    notificationTimer=setTimeout(()=>{
+
+        n.classList.remove("show");
+
+    },3000);
+}
+
+
+/* =========================
+   GAME LAUNCHER
+========================= */
+
+function launchGame(name,icon){
+
+    openWindow("gameWindow");
+
+    document.getElementById("gameWindowTitle")
+        .textContent=icon+" "+name;
+
+    document.getElementById("connectIcon")
+        .textContent=icon;
+
+    document.getElementById("connectTitle")
+        .textContent=name+" baþlatýlýyor...";
+
+    document.getElementById("connectText")
+        .textContent=
+        "Uzak oyun bilgisayarý aranýyor...";
+
+    document.getElementById("connectScreen")
+        .style.display="flex";
+
+    const bar =
+        document.getElementById("connectProgress");
+
+    bar.style.width="0%";
+
+    let p=0;
+
+    const timer=setInterval(()=>{
+
+        p+=10;
+
+        bar.style.width=p+"%";
+
+        if(p>=100){
+
+            clearInterval(timer);
+
+            document.getElementById("connectTitle")
+                .textContent=
+                "Remote PC baðlantýsý hazýr";
+
+            document.getElementById("connectText")
+                .textContent=
+                "Gerçek oyun akýþý baðlantýsý burada baþlatýlacak.";
+
+            notify(
+                name+
+                " için baðlantý katmaný hazýr."
+            );
+
+        }
+
+    },180);
+}
+
+
+/* =========================
+   CLOSE GAME
+========================= */
+
+function closeGame(){
+
+    document.getElementById("gameWindow")
+        .style.display="none";
+
+    document.getElementById("connectScreen")
+        .style.display="none";
+}
+
+
+/* =========================
+   TERMINAL
+========================= */
+
+function terminalCommand(e){
+
+    if(e.key!=="Enter") return;
+
+    const input=e.target;
+
+    const command=input.value
+        .trim()
+        .toLowerCase();
+
+    const output =
+        document.getElementById("terminalOutput");
+
+    input.remove();
+
+    output.innerHTML +=
+        command+"<br>";
+
+    let result="";
+
+    if(command==="help"){
+
+        result=
+        "help - komutlarý göster<br>"+
+        "games - oyunlarý göster<br>"+
+        "roblox - Roblox launcher<br>"+
+        "minecraft - Minecraft launcher<br>"+
+        "cuphead - Cuphead launcher<br>"+
+        "clear - ekraný temizle";
+
+    }
+
+    else if(command==="games"){
+
+        result=
+        "Roblox<br>"+
+        "Minecraft<br>"+
+        "Cuphead";
+
+    }
+
+    else if(command==="roblox"){
+
+        result="Roblox launcher açýlýyor...";
+
+        setTimeout(
+            ()=>launchGame("Roblox","??"),
+            400
+        );
+
+    }
+
+    else if(command==="minecraft"){
+
+        result="Minecraft launcher açýlýyor...";
+
+        setTimeout(
+            ()=>launchGame("Minecraft","??"),
+            400
+        );
+
+    }
+
+    else if(command==="cuphead"){
+
+        result="Cuphead launcher açýlýyor...";
+
+        setTimeout(
+            ()=>launchGame("Cuphead","?"),
+            400
+        );
+
+    }
+
+    else if(command==="clear"){
+
+        output.innerHTML="";
+
+        addTerminalInput();
+
+        return;
+
+    }
+
+    else if(command===""){
+
+        result="";
+
+    }
+
+    else{
+
+        result=
+        "Bilinmeyen komut: "+
+        command;
+
+    }
+
+    output.innerHTML +=
+        result+
+        "<br><br>";
+
+    addTerminalInput();
+}
+
+
+function addTerminalInput(){
+
+    const output =
+        document.getElementById("terminalOutput");
+
+    output.innerHTML +=
+        '<span>GameOS&gt; </span>'+
+        '<input class="terminalInput" id="terminalInput" autocomplete="off" onkeydown="terminalCommand(event)">';
+
+    document.getElementById("terminalInput").focus();
+
+    output.scrollTop=output.scrollHeight;
+}
+
+
+/* =========================
+   DRAG WINDOWS
+========================= */
+
+document.querySelectorAll(".window")
+.forEach(win=>{
+
+    const header =
+        win.querySelector(".windowHeader");
+
+    let dragging=false;
+    let offsetX=0;
+    let offsetY=0;
+
+    header.addEventListener("mousedown",e=>{
+
+        dragging=true;
+
+        const rect=win.getBoundingClientRect();
+
+        offsetX=e.clientX-rect.left;
+        offsetY=e.clientY-rect.top;
+
+        highestZ++;
+
+        win.style.zIndex=highestZ;
+
+    });
+
+    document.addEventListener("mousemove",e=>{
+
+        if(!dragging) return;
+
+        win.style.left=
+            (e.clientX-offsetX)+"px";
+
+        win.style.top=
+            (e.clientY-offsetY)+"px";
+
+        win.style.transform="none";
+
+    });
+
+    document.addEventListener("mouseup",()=>{
+
+        dragging=false;
+
+    });
+
+});
+
+
+/* =========================
+   ESC = CLOSE START
+========================= */
+
+document.addEventListener("keydown",e=>{
+
+    if(e.key==="Escape"){
+
+        document.getElementById("startMenu")
+            .style.display="none";
+
+    }
+
+});
+
+</script>
+
+</body>
+</html>
