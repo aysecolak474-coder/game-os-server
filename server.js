@@ -1,4 +1,3 @@
-```js
 const http = require("http");
 
 const PORT = process.env.PORT || 10000;
@@ -11,7 +10,6 @@ const server = http.createServer((req, res) => {
     res.end("GAMEOS SERVER ONLINE");
 });
 
-server.listen(PORT, () => {
-    console.log(`GameOS server listening on port ${PORT}`);
+server.listen(PORT, "0.0.0.0", function () {
+    console.log("GAMEOS SERVER ONLINE - Port: " + PORT);
 });
-```
